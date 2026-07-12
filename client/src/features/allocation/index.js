@@ -1,0 +1,1 @@
+export { default as AllocationPage } from './pages/AllocationPage.jsx';

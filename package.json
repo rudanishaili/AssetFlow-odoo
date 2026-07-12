@@ -1,0 +1,19 @@
+{
+  "name": "assetflow-workspace",
+  "version": "1.0.0",
+  "description": "AssetFlow - Odoo-styled Enterprise Asset Management System",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "client:dev": "npm run dev --prefix client",
+    "server:dev": "npm run dev --prefix server",
+    "dev": "concurrently \"npm run client:dev\" \"npm run server:dev\"",
+    "install:all": "npm install && npm install --prefix client && npm install --prefix server"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
