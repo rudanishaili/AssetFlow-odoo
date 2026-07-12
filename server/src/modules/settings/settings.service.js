@@ -1,9 +1,9 @@
 import settingsRepository from './settings.repository.js';
 
-export const getAll = async () => {
-  return settingsRepository.findAll();
+export const getSettings = async () => {
+  return settingsRepository.getSettings();
 };
 
 export default {
-  getAll,
+  getSettings
 };

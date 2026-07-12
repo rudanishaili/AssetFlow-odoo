@@ -14,12 +14,50 @@ enum Role {
   AUDITOR
 }
 
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum AssetCondition {
+  NEW
+  GOOD
+  FAIR
+  POOR
+}
+
 enum AssetStatus {
   AVAILABLE
   ALLOCATED
   RESERVED
-  MAINTENANCE
+  UNDER_MAINTENANCE
+  LOST
+  RETIRED
   DISPOSED
+}
+
+enum AssignmentStatus {
+  ACTIVE
+  RETURNED
+  OVERDUE
+}
+
+enum RequestType {
+  ALLOCATION
+  TRANSFER
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum MaintenancePriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
 }
 
 enum BookingStatus {
@@ -27,6 +65,9 @@ enum BookingStatus {
   APPROVED
   REJECTED
   CANCELLED
+  UPCOMING
+  ONGOING
+  COMPLETED
 }
 
 enum MaintenanceStatus {
@@ -34,47 +75,433 @@ enum MaintenanceStatus {
   IN_PROGRESS
   COMPLETED
   CANCELLED
+  PENDING
+  APPROVED
+  REJECTED
+  TECHNICIAN_ASSIGNED
+  RESOLVED
 }
 
-enum AuditStatus {
-  PENDING
-  IN_PROGRESS
+enum AuditCycleStatus {
+  PLANNED
+  ACTIVE
   COMPLETED
 }
 
+enum AuditItemStatus {
+  PENDING
+  VERIFIED
+  MISSING
+  DAMAGED
+}
+
+enum DiscrepancyStatus {
+  OPEN
+  RESOLVED
+}
+
+enum NotificationType {
+  SYSTEM
+  ALLOCATION
+  MAINTENANCE
+  BOOKING
+  TRANSFER
+  AUDIT
+}
+
 model User {
-  id            String         @id @default(uuid())
-  email         String         @unique
-  password      String
-  name          String
-  role          Role           @default(EMPLOYEE)
-  department    String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  allocations   Allocation[]
-  bookings      Booking[]
-  audits        Audit[]        @relation("AuditorRelation")
-  notifications Notification[]
+  id                    String                @id @default(uuid())
+  email                 String                @unique
+  password              String
+  name                  String
+  role                  Role                  @default(EMPLOYEE)
+  status                UserStatus            @default(ACTIVE)
+  department            String?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  
+  // Relations for old backend
+  allocations           Allocation[]
+  oldBookings           Booking[]
+  oldAudits             Audit[]               @relation("AuditorRelation")
+  oldNotifications      OldNotification[]     @relation("OldUserNotifications")
+  allocationRequests    AllocationRequest[]
+
+  // Relations for new TS seeders
+  departmentId          String?
+  departmentRelation    Department?           @relation("DepartmentEmployees", fields: [departmentId], references: [id])
+  headedDepartment      Department?           @relation("DepartmentHead")
+  assignments           AssetAssignment[]     @relation("EmployeeAssignments")
+  requests              AssetRequest[]        @relation("RequesterRequests")
+  targetRequests        AssetRequest[]        @relation("TargetEmployeeRequests")
+  actionedRequests      AssetRequest[]        @relation("ActionedRequests")
+  raisedMaintenance     MaintenanceRequest[]  @relation("RaisedMaintenanceRequests")
+  actionedMaintenance   MaintenanceRequest[]  @relation("ActionedMaintenanceRequests")
+  bookings              ResourceBooking[]
+  auditorItems          AuditItem[]
+  resolvedDiscrepancies AuditDiscrepancy[]    @relation("ResolvedDiscrepancies")
+  notifications         Notification[]        @relation("UserNotifications")
+  auditLogs             AuditLog[]
+
+  @@index([email])
+  @@index([departmentId])
+}
+
+model Department {
+  id               String            @id @default(uuid())
+  name             String            @unique
+  status           UserStatus        @default(ACTIVE)
+  
+  // Hierarchy
+  parentId         String?
+  parent           Department?       @relation("DepartmentHierarchy", fields: [parentId], references: [id])
+  subDepartments   Department[]      @relation("DepartmentHierarchy")
+
+  // Department Head
+  headId           String?           @unique
+  head             User?             @relation("DepartmentHead", fields: [headId], references: [id])
+
+  // Employees in the department
+  employees        User[]            @relation("DepartmentEmployees")
+
+  // Target of assignments and requests
+  assignments      AssetAssignment[]
+  requests         AssetRequest[]
+
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@index([parentId])
+}
+
+model Category {
+  id                String   @id @default(uuid())
+  name              String   @unique
+  description       String?
+  
+  // dynamic fields specification stored as JSON (e.g. [{"name": "warrantyMonths", "type": "number"}])
+  customFieldSpecs  Json?
+
+  assets            Asset[]
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Vendor {
+  id          String   @id @default(uuid())
+  name        String
+  email       String?
+  phone       String?
+  address     String?
+  
+  assets      Asset[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Asset {
-  id           String        @id @default(uuid())
-  name         String
-  code         String        @unique // Asset tag / barcode
-  category     String
-  status       AssetStatus   @default(AVAILABLE)
-  value        Float
-  serialNumber String?
-  purchaseDate DateTime?
-  location     String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  allocations  Allocation[]
-  bookings     Booking[]
-  maintenances Maintenance[]
-  audits       Audit[]
+  id                String               @id @default(uuid())
+  name              String
+  code              String?              @unique // For old backend
+  category          String?              // For old backend
+  value             Float?               // For old backend
+  purchaseDate      DateTime?            // For old backend
+  
+  // Fields for new TS seeders
+  assetTag          String               @unique // e.g. AF-0001
+  serialNumber      String               @unique
+  acquisitionDate   DateTime             @default(now())
+  acquisitionCost   Decimal              @db.Decimal(12, 2) @default(0.0)
+  condition         AssetCondition       @default(NEW)
+  location          String
+  isSharedBookable  Boolean              @default(false)
+  status            AssetStatus          @default(AVAILABLE)
+  customFieldValues Json?
+
+  // Relations for old backend
+  allocations       Allocation[]
+  oldBookings       Booking[]
+  oldMaintenances   Maintenance[]
+  oldAudits         Audit[]
+
+  // Relations for new TS seeders
+  categoryId        String?
+  categoryRelation  Category?            @relation(fields: [categoryId], references: [id])
+  vendorId          String?
+  vendor            Vendor?              @relation(fields: [vendorId], references: [id])
+  warranty          Warranty?
+  purchaseDetails   PurchaseDetails?
+  images            AssetImage[]
+  assignments       AssetAssignment[]
+  requests          AssetRequest[]
+  bookings          ResourceBooking[]
+  maintenance       MaintenanceRequest[]
+  auditItems        AuditItem[]
+
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  @@index([categoryId])
+  @@index([vendorId])
+  @@index([status])
+  @@index([location])
 }
 
+model AssetImage {
+  id        String   @id @default(uuid())
+  url       String
+  
+  assetId   String
+  asset     Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([assetId])
+}
+
+model Warranty {
+  id          String   @id @default(uuid())
+  provider    String
+  startDate   DateTime
+  endDate     DateTime
+  contactInfo String?
+  terms       String?  @db.Text
+
+  assetId     String   @unique
+  asset       Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PurchaseDetails {
+  id                  String   @id @default(uuid())
+  invoiceNumber       String
+  purchaseOrderNumber String?
+  purchaseDate        DateTime
+  cost                Decimal  @db.Decimal(12, 2)
+
+  assetId             String   @unique
+  asset               Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model AssetAssignment {
+  id                    String           @id @default(uuid())
+  assignedDate          DateTime         @default(now())
+  expectedReturnDate    DateTime?
+  returnedDate          DateTime?
+  conditionCheckInNotes String?          @db.Text
+  status                AssignmentStatus @default(ACTIVE)
+
+  // Relations
+  assetId               String
+  asset                 Asset            @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  // Can be assigned to employee or department
+  employeeId            String?
+  employee              User?            @relation("EmployeeAssignments", fields: [employeeId], references: [id])
+
+  departmentId          String?
+  department            Department?      @relation(fields: [departmentId], references: [id])
+
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  @@index([assetId])
+  @@index([employeeId])
+  @@index([departmentId])
+  @@index([status])
+}
+
+model AssetRequest {
+  id                  String        @id @default(uuid())
+  requestType         RequestType   @default(ALLOCATION)
+  status              RequestStatus @default(PENDING)
+  notes               String?       @db.Text
+  
+  // Relations
+  assetId             String
+  asset               Asset         @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  requesterId         String
+  requester           User          @relation("RequesterRequests", fields: [requesterId], references: [id])
+
+  targetEmployeeId    String?
+  targetEmployee      User?         @relation("TargetEmployeeRequests", fields: [targetEmployeeId], references: [id])
+
+  targetDepartmentId  String?
+  targetDepartment    Department?   @relation(fields: [targetDepartmentId], references: [id])
+
+  actionedById        String?
+  actionedBy          User?         @relation("ActionedRequests", fields: [actionedById], references: [id])
+
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  @@index([assetId])
+  @@index([requesterId])
+  @@index([status])
+}
+
+model ResourceBooking {
+  id        String        @id @default(uuid())
+  startTime DateTime
+  endTime   DateTime
+  status    BookingStatus @default(UPCOMING)
+
+  // Relations
+  assetId   String
+  asset     Asset         @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  bookerId  String
+  booker    User          @relation(fields: [bookerId], references: [id])
+
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([assetId])
+  @@index([bookerId])
+  @@index([status])
+  @@index([startTime, endTime])
+}
+
+model MaintenanceRequest {
+  id                  String              @id @default(uuid())
+  issueDescription    String              @db.Text
+  priority            MaintenancePriority @default(MEDIUM)
+  status              MaintenanceStatus   @default(PENDING)
+  technicianName      String?
+  cost                Decimal?            @db.Decimal(12, 2)
+  nextMaintenanceDate DateTime?
+  scheduledDate       DateTime?
+  completedDate       DateTime?
+  notes               String?             @db.Text
+
+  // Relations
+  assetId             String
+  asset               Asset               @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  raisedById          String
+  raisedBy            User                @relation("RaisedMaintenanceRequests", fields: [raisedById], references: [id])
+
+  approvedById        String?
+  approvedBy          User?               @relation("ActionedMaintenanceRequests", fields: [approvedById], references: [id])
+
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  @@index([assetId])
+  @@index([status])
+  @@index([raisedById])
+}
+
+model AuditCycle {
+  id                 String           @id @default(uuid())
+  name               String
+  scopeLocation      String?
+  startDate          DateTime
+  endDate            DateTime
+  status             AuditCycleStatus @default(PLANNED)
+
+  // Relations
+  scopeDepartmentId  String?
+
+  auditItems         AuditItem[]
+
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@index([status])
+}
+
+model AuditItem {
+  id                String          @id @default(uuid())
+  status            AuditItemStatus @default(PENDING)
+  verificationNotes String?         @db.Text
+
+  // Relations
+  auditCycleId      String
+  auditCycle        AuditCycle      @relation(fields: [auditCycleId], references: [id], onDelete: Cascade)
+
+  assetId           String
+  asset             Asset           @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  auditorId         String
+  auditor           User            @relation(fields: [auditorId], references: [id])
+
+  discrepancies     AuditDiscrepancy[]
+
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@index([auditCycleId])
+  @@index([assetId])
+  @@index([auditorId])
+  @@index([status])
+}
+
+model AuditDiscrepancy {
+  id              String            @id @default(uuid())
+  description     String            @db.Text
+  status          DiscrepancyStatus @default(OPEN)
+  resolutionNotes String?           @db.Text
+
+  // Relations
+  auditItemId     String
+  auditItem       AuditItem         @relation(fields: [auditItemId], references: [id], onDelete: Cascade)
+
+  resolvedById    String?
+  resolvedBy      User?             @relation("ResolvedDiscrepancies", fields: [resolvedById], references: [id])
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([auditItemId])
+  @@index([status])
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  title     String
+  message   String           @db.Text
+  read      Boolean          @default(false) // For old backend
+  isRead    Boolean          @default(false) // For new seeders
+  type      NotificationType @default(SYSTEM)
+
+  // Relations
+  userId    String
+  user      User             @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@index([userId])
+  @@index([isRead])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  details   Json?
+  ipAddress String?
+
+  // Relations
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// Models for keeping old backend fully functional
 model Allocation {
   id          String    @id @default(uuid())
   assetId     String
@@ -84,15 +511,15 @@ model Allocation {
   allocatedBy String
   allocatedAt DateTime  @default(now())
   returnedAt  DateTime?
-  status      String    @default("ACTIVE") // ACTIVE, RETURNED
+  status      String    @default("ACTIVE")
 }
 
 model Booking {
   id        String        @id @default(uuid())
   assetId   String
   asset     Asset         @relation(fields: [assetId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   startDate DateTime
   endDate   DateTime
   status    BookingStatus @default(PENDING)
@@ -127,10 +554,28 @@ model Audit {
   updatedAt DateTime    @updatedAt
 }
 
-model Notification {
+enum AuditStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+model AllocationRequest {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userName    String
+  department  String
+  assetType   String
+  notes       String?
+  status      String   @default("PENDING")
+  requestedAt DateTime @default(now())
+}
+
+model OldNotification {
   id        String   @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation("OldUserNotifications", fields: [userId], references: [id], onDelete: Cascade)
   title     String
   message   String
   read      Boolean  @default(false)

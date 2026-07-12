@@ -3,13 +3,12 @@ import { useNavigate, Link } from 'react-router-dom';
 import Input from '../../../common/ui/Input.jsx';
 import Button from '../../../common/ui/Button.jsx';
 import useAuthStore from '../../../store/authStore.js';
-import useMockDataStore from '../../../store/mockDataStore.js';
+import api from '../../../services/axios.js';
 import { Briefcase, Award, User } from 'lucide-react';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
-  const employees = useMockDataStore((state) => state.employees);
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,7 +19,7 @@ export const LoginPage = () => {
     setMounted(true);
   }, []);
 
-  const handleLogin = (loginEmail, loginPassword) => {
+  const handleLogin = async (loginEmail, loginPassword) => {
     setError('');
 
     if (!loginEmail) {
@@ -34,36 +33,19 @@ export const LoginPage = () => {
       return;
     }
 
-    const foundUser = employees.find(
-      (emp) => emp.email.toLowerCase() === loginEmail.toLowerCase()
-    );
-
-    let loggedInUser = null;
-    if (foundUser) {
-      loggedInUser = {
-        id: foundUser.id,
-        email: foundUser.email,
-        name: foundUser.name,
-        role: foundUser.role,
-        department: foundUser.department
-      };
-    } else {
-      let role = 'EMPLOYEE';
-      if (loginEmail.includes('manager') || loginEmail.includes('asset')) role = 'MANAGER';
-      else if (loginEmail.includes('head') || loginEmail.includes('dept')) role = 'AUDITOR';
-
-      loggedInUser = {
-        id: `custom-${Date.now()}`,
+    try {
+      const response = await api.post('/auth/login', {
         email: loginEmail,
-        name: loginEmail.split('@')[0],
-        role: role,
-        department: 'Corporate Office'
-      };
-    }
+        password: loginPassword || 'Password123'
+      });
 
-    const mockToken = `mock-token-${loggedInUser.role}-${Date.now()}`;
-    setAuth(loggedInUser, mockToken);
-    navigate('/dashboard');
+      if (response.success) {
+        setAuth(response.data.user, response.data.token);
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      setError(err.message || 'Login failed. Please verify credentials.');
+    }
   };
 
   const handleSubmit = (e) => {

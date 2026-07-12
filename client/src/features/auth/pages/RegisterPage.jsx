@@ -5,6 +5,7 @@ import Select from '../../../common/ui/Select.jsx';
 import Button from '../../../common/ui/Button.jsx';
 import useAuthStore from '../../../store/authStore.js';
 import useMockDataStore from '../../../store/mockDataStore.js';
+import api from '../../../services/axios.js';
 
 export const RegisterPage = () => {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ export const RegisterPage = () => {
     setMounted(true);
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -34,29 +35,22 @@ export const RegisterPage = () => {
       return;
     }
 
-    // Add user to mock database store
-    const newId = `user-${Date.now()}`;
-    const newMockUser = {
-      id: newId,
-      email: email,
-      name: name,
-      role: role,
-      department: department
-    };
+    try {
+      const response = await api.post('/auth/register', {
+        name,
+        email,
+        password,
+        role,
+        department
+      });
 
-    // Push into the store's employees array
-    useMockDataStore.setState((state) => ({
-      employees: [...state.employees, newMockUser]
-    }));
-
-    // Log user in
-    const mockToken = `mock-token-${role}-${Date.now()}`;
-    setAuth(newMockUser, mockToken);
-    
-    // Log system activity
-    useMockDataStore.getState().addActivityLog(newId, name, 'REGISTER', `Registered new account as ${role}`);
-
-    navigate('/dashboard');
+      if (response.success) {
+        setAuth(response.data.user, response.data.token);
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      setError(err.message || 'Registration failed. Try a different email.');
+    }
   };
 
   const roleOptions = [

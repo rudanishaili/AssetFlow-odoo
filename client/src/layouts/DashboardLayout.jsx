@@ -1,11 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from '../common/layout/Sidebar.jsx';
 import Header from '../common/layout/Header.jsx';
 import Navbar from '../common/layout/Navbar.jsx';
+import useMockDataStore from '../store/mockDataStore.js';
 
 export const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const fetchInitialData = useMockDataStore((state) => state.fetchInitialData);
+
+  useEffect(() => {
+    fetchInitialData();
+  }, [fetchInitialData]);
 
   const toggleSidebar = () => {
     setSidebarOpen(prev => !prev);

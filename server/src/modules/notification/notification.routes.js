@@ -4,6 +4,7 @@ import authMiddleware from '../../middlewares/auth.middleware.js';
 
 const router = Router();
 
-router.get('/', authMiddleware, notificationController.getItems);
+router.get('/', authMiddleware, notificationController.getMyNotifications);
+router.put('/:id/read', authMiddleware, notificationController.markRead);
 
 export default router;

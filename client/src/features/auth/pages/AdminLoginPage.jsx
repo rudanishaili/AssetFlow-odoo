@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Input from '../../../common/ui/Input.jsx';
 import Button from '../../../common/ui/Button.jsx';
+import api from '../../../services/axios.js';
 import useAuthStore from '../../../store/authStore.js';
-import useMockDataStore from '../../../store/mockDataStore.js';
 import { ShieldAlert } from 'lucide-react';
 
 export const AdminLoginPage = () => {
@@ -19,26 +19,24 @@ export const AdminLoginPage = () => {
     setMounted(true);
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
     if (username === 'Admin123' && password === 'admin123') {
-      const adminUser = {
-        id: 'admin-id',
-        email: 'admin@company.com',
-        name: 'John Admin',
-        role: 'ADMIN',
-        department: 'Corporate Office'
-      };
-      
-      const mockToken = `mock-token-ADMIN-${Date.now()}`;
-      setAuth(adminUser, mockToken);
+      try {
+        const response = await api.post('/auth/login', {
+          email: 'admin@assetflow.com',
+          password: 'Password123'
+        });
 
-      // Log activity
-      useMockDataStore.getState().addActivityLog('admin-id', 'John Admin', 'ADMIN_LOGIN', 'Admin authenticated via secure gateway.');
-
-      navigate('/dashboard');
+        if (response.success) {
+          setAuth(response.data.user, response.data.token);
+          navigate('/dashboard');
+        }
+      } catch (err) {
+        setError('Database connection error or invalid seeded admin config.');
+      }
     } else {
       setError('Invalid Administrator credentials.');
     }

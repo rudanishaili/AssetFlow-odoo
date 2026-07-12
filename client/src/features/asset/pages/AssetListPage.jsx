@@ -40,6 +40,51 @@ export const AssetListPage = () => {
     }
   };
 
+  const LaptopSVG = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--moss)' }}>
+      <rect x="3" y="4" width="18" height="12" rx="2" />
+      <path d="M2 20h20" />
+    </svg>
+  );
+
+  const MonitorSVG = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--moss)' }}>
+      <rect x="2" y="3" width="20" height="14" rx="2" />
+      <line x1="12" y1="17" x2="12" y2="21" />
+      <line x1="8" y1="21" x2="16" y2="21" />
+    </svg>
+  );
+
+  const MobileSVG = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--moss)' }}>
+      <rect x="5" y="2" width="14" height="20" rx="2" />
+      <path d="M12 18h.01" />
+    </svg>
+  );
+
+  const PeripheralSVG = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--moss)' }}>
+      <rect x="3" y="11" width="18" height="10" rx="2" />
+      <path d="M12 2v9" />
+    </svg>
+  );
+
+  const AVEquipmentSVG = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--moss)' }}>
+      <rect x="1" y="5" width="15" height="14" rx="2" />
+      <path d="M23 7l-7 5 7 5V7z" />
+    </svg>
+  );
+
+  const getCategoryIcon = (category = '') => {
+    const cat = category.toLowerCase();
+    if (cat.includes('laptop')) return <LaptopSVG />;
+    if (cat.includes('monitor')) return <MonitorSVG />;
+    if (cat.includes('mobile') || cat.includes('phone')) return <MobileSVG />;
+    if (cat.includes('peripheral') || cat.includes('mouse') || cat.includes('keyboard')) return <PeripheralSVG />;
+    return <AVEquipmentSVG />;
+  };
+
   const handleQRClick = (asset, e) => {
     e.stopPropagation();
     setSelectedAsset(asset);
@@ -114,7 +159,24 @@ export const AssetListPage = () => {
                 style={{ borderBottom: '1px solid var(--linen)', cursor: 'pointer' }}
                 className="table-row-hover"
               >
-                <td style={{ padding: '16px 8px', fontWeight: 600 }}>{asset.name}</td>
+                <td style={{ padding: '16px 8px', fontWeight: 600 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: 'var(--radius-full)',
+                      background: 'var(--stone)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: 'var(--shadow-sm)',
+                      flexShrink: 0
+                    }}>
+                      {getCategoryIcon(asset.category)}
+                    </div>
+                    <span>{asset.name}</span>
+                  </div>
+                </td>
                 <td style={{ padding: '16px 8px', color: 'var(--text-secondary)' }}>{asset.code}</td>
                 <td style={{ padding: '16px 8px', color: 'var(--text-secondary)' }}>{asset.category}</td>
                 <td style={{ padding: '16px 8px', color: 'var(--text-muted)' }}>{asset.location}</td>
