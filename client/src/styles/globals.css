@@ -1,0 +1,126 @@
+@import './variables.css';
+@import './theme.css';
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--background);
+  color: var(--text-primary);
+  line-height: 1.6; /* 1.6 from design.md */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+/* Liora Typography */
+h1, h2, h3, h4, h5, h6 { 
+  font-family: var(--font-display); 
+  font-weight: 400; 
+  color: var(--moss); 
+}
+
+h1 {
+  font-size: 72px;
+  line-height: 1.05;
+}
+
+h2 {
+  font-size: 44px;
+  line-height: 1.1;
+}
+
+h3 {
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+h1 em, h2 em, h3 em { 
+  font-style: italic; 
+  color: var(--sage); 
+}
+
+p {
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+.text-lg {
+  font-size: 19px;
+}
+
+a {
+  font-family: var(--font-body);
+  color: var(--ink);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--moss);
+}
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+input, select, textarea {
+  font-family: var(--font-body);
+  font-size: 1rem;
+}
+
+/* Layout Utilities */
+.container {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-2xl); /* 64px desktop */
+}
+
+/* Flex utilities */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.gap-sm { gap: var(--spacing-sm); }
+.gap-md { gap: var(--spacing-md); }
+.gap-lg { gap: var(--spacing-lg); }
+
+/* Grid utilities */
+.grid { display: grid; }
+.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+/* Responsive Overrides matching design.md */
+@media (max-width: 1024px) { /* Tablet */
+  .grid-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) { /* Mobile */
+  h1 { font-size: 40px; }
+  h2 { font-size: 30px; }
+  h3 { font-size: 20px; }
+  p.text-lg { font-size: 17px; }
+  p { font-size: 15px; }
+
+  .container {
+    padding: 0 20px; /* 20px side gutters mobile */
+  }
+
+  .grid-cols-4, .grid-cols-3, .grid-cols-2 { grid-template-columns: 1fr; }
+  .flex-responsive { flex-direction: column; }
+}

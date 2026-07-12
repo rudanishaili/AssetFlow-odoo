@@ -1,0 +1,138 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  EMPLOYEE
+  AUDITOR
+}
+
+enum AssetStatus {
+  AVAILABLE
+  ALLOCATED
+  RESERVED
+  MAINTENANCE
+  DISPOSED
+}
+
+enum BookingStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum MaintenanceStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum AuditStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  password      String
+  name          String
+  role          Role           @default(EMPLOYEE)
+  department    String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  allocations   Allocation[]
+  bookings      Booking[]
+  audits        Audit[]        @relation("AuditorRelation")
+  notifications Notification[]
+}
+
+model Asset {
+  id           String        @id @default(uuid())
+  name         String
+  code         String        @unique // Asset tag / barcode
+  category     String
+  status       AssetStatus   @default(AVAILABLE)
+  value        Float
+  serialNumber String?
+  purchaseDate DateTime?
+  location     String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  allocations  Allocation[]
+  bookings     Booking[]
+  maintenances Maintenance[]
+  audits       Audit[]
+}
+
+model Allocation {
+  id          String    @id @default(uuid())
+  assetId     String
+  asset       Asset     @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  allocatedBy String
+  allocatedAt DateTime  @default(now())
+  returnedAt  DateTime?
+  status      String    @default("ACTIVE") // ACTIVE, RETURNED
+}
+
+model Booking {
+  id        String        @id @default(uuid())
+  assetId   String
+  asset     Asset         @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  startDate DateTime
+  endDate   DateTime
+  status    BookingStatus @default(PENDING)
+  purpose   String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model Maintenance {
+  id          String            @id @default(uuid())
+  assetId     String
+  asset       Asset             @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  description String
+  cost        Float             @default(0.0)
+  status      MaintenanceStatus @default(SCHEDULED)
+  startDate   DateTime
+  endDate     DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+model Audit {
+  id        String      @id @default(uuid())
+  assetId   String
+  asset     Asset       @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  auditorId String
+  auditor   User        @relation("AuditorRelation", fields: [auditorId], references: [id], onDelete: Cascade)
+  status    AuditStatus @default(PENDING)
+  findings  String?
+  auditedAt DateTime?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

@@ -1,0 +1,7 @@
+export const AUDIT_STATUS = {
+  PENDING: 'PENDING',
+  IN_PROGRESS: 'IN_PROGRESS',
+  COMPLETED: 'COMPLETED'
+};
+
+export default AUDIT_STATUS;

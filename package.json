@@ -1,0 +1,31 @@
+{
+  "name": "assetflow-root",
+  "version": "1.0.0",
+  "description": "AssetFlow - Asset Management and Allocation System",
+  "main": "index.js",
+  "scripts": {
+    "install:all": "npm install && npm install --prefix server && npm install --prefix client",
+    "dev:server": "npm run dev --prefix server",
+    "dev:client": "npm run dev --prefix client",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "prisma:generate": "npm run prisma:generate --prefix server",
+    "prisma:migrate": "npm run prisma:migrate --prefix server",
+    "prisma:studio": "npm run prisma:studio --prefix server"
+  },
+  "keywords": [
+    "asset",
+    "management",
+    "allocation",
+    "booking",
+    "audit",
+    "prisma",
+    "react",
+    "vite",
+    "express"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
