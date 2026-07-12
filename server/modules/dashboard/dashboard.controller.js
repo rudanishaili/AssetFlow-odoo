@@ -1,0 +1,2 @@
+// dashboard controller
+module.exports = {};

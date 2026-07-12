@@ -1,0 +1,2 @@
+// dashboard routes
+module.exports = {};

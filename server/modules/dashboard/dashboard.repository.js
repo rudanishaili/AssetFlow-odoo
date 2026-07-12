@@ -1,0 +1,2 @@
+// dashboard repository
+module.exports = {};
