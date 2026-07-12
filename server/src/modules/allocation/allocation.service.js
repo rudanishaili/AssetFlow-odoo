@@ -8,7 +8,7 @@ export const getAll = async () => {
 };
 
 export const checkoutAsset = async (checkoutData, allocatedBy) => {
-  const { assetId, userId } = checkoutData;
+  const { assetId, userId, dueDate } = checkoutData;
 
   const asset = await assetRepository.findById(assetId);
   if (!asset) {
@@ -24,7 +24,8 @@ export const checkoutAsset = async (checkoutData, allocatedBy) => {
     assetId,
     userId,
     allocatedBy,
-    status: 'ACTIVE'
+    status: 'ACTIVE',
+    dueDate: dueDate ? new Date(dueDate) : null
   });
 
   // Update asset status

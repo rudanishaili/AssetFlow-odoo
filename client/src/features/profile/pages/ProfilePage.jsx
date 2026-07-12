@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import PageTitle from '../../../common/layout/PageTitle.jsx';
 import Button from '../../../common/ui/Button.jsx';
+import { generateQRCodeUrl } from '../../../utils/generateQR.js';
 
 export const ProfilePage = () => {
   const [user] = useState({
@@ -134,10 +135,14 @@ export const ProfilePage = () => {
               Scan this QR label or enter verification details to confirm you have <strong>{selectedAsset?.name}</strong>.
             </p>
             
-            {/* Mock QR graphic */}
-            <div style={{ width: '160px', height: '160px', background: 'var(--stone)', border: '2px dashed var(--sage)', borderRadius: 'var(--radius-md)', margin: '0 auto var(--spacing-xl) auto', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-              <div style={{ width: '100px', height: '100px', background: '#000', display: 'flex', flexWrap: 'wrap', opacity: 0.8 }} />
-              <span className="eyebrow" style={{ fontSize: '10px', marginTop: '8px' }}>S/N: {selectedAsset?.serial}</span>
+            {/* Real QR graphic */}
+            <div style={{ width: '160px', height: '200px', background: 'var(--stone)', border: '1px solid var(--sage-light)', borderRadius: 'var(--radius-md)', margin: '0 auto var(--spacing-xl) auto', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', padding: '12px' }}>
+              <img 
+                src={generateQRCodeUrl(selectedAsset?.serial || selectedAsset?.code)} 
+                alt="QR Code" 
+                style={{ width: '130px', height: '130px', display: 'block', marginBottom: '8px' }} 
+              />
+              <span className="eyebrow" style={{ fontSize: '10px' }}>S/N: {selectedAsset?.serial || '—'}</span>
             </div>
 
             <div className="flex gap-sm">

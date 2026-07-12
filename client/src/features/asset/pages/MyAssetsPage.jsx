@@ -14,7 +14,7 @@ export const MyAssetsPage = () => {
   const userId = user?.id || '';
 
   // Get assets allocated to the current user
-  const myCheckedOut = assets.filter(a => a.holderId === userId);
+  const myCheckedOut = assets.filter(a => a.allocations?.some(alloc => alloc.userId === userId && alloc.status === 'ACTIVE'));
 
   const handleReturnRequest = (assetId) => {
     requestReturn(assetId, userId);

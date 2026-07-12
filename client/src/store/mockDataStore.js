@@ -86,11 +86,12 @@ export const useMockDataStore = create((set, get) => ({
   },
 
   // Allocation Actions
-  checkoutAsset: async (assetId, userId) => {
+  checkoutAsset: async (assetId, userId, dueDate) => {
     try {
       const response = await api.post('/allocation/checkout', {
         assetId,
-        userId
+        userId,
+        dueDate
       });
       if (response.success) {
         await get().fetchInitialData();

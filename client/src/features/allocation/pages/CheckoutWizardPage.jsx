@@ -11,7 +11,7 @@ export const CheckoutWizardPage = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   
-  const { employees, assets, addAllocation } = useMockDataStore();
+  const { employees, assets, checkoutAsset } = useMockDataStore();
   
   const [recipientId, setRecipientId] = useState('');
   const [scanInput, setScanInput] = useState('');
@@ -78,12 +78,7 @@ export const CheckoutWizardPage = () => {
 
     // Allocate all scanned assets
     scannedAssets.forEach(asset => {
-      addAllocation({
-        assetId: asset.id,
-        userId: recipientId,
-        allocatedBy: user?.name || 'Asset Manager',
-        dueDate: dueDate
-      });
+      checkoutAsset(asset.id, recipientId, dueDate);
     });
 
     navigate('/allocations');

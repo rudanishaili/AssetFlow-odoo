@@ -5,6 +5,7 @@ import Button from '../../../common/ui/Button.jsx';
 import useMockDataStore from '../../../store/mockDataStore.js';
 import useAuthStore from '../../../store/authStore.js';
 import { History, Wrench, UserCheck, ArrowLeft } from 'lucide-react';
+import { generateQRCodeUrl } from '../../../utils/generateQR.js';
 
 export const AssetDetailPage = () => {
   const { id } = useParams();
@@ -114,10 +115,14 @@ export const AssetDetailPage = () => {
         <div className="liora-card-stone" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
           <h4 className="eyebrow" style={{ marginBottom: 'var(--spacing-md)' }}>QR Asset Tag</h4>
           <div style={{ padding: '8px', background: '#fff', borderRadius: 'var(--radius-sm)', marginBottom: 'var(--spacing-md)' }}>
-            <div style={{ width: '130px', height: '130px', background: '#000', margin: '0 auto', opacity: 0.9 }} />
+            <img 
+              src={generateQRCodeUrl(asset.code || asset.assetTag)} 
+              alt="QR Code" 
+              style={{ width: '130px', height: '130px', display: 'block', margin: '0 auto' }} 
+            />
           </div>
-          <span style={{ fontSize: '13px', fontWeight: 600 }}>{asset.code}</span>
-          <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: 'var(--spacing-md)' }}>S/N: {asset.serial || '—'}</span>
+          <span style={{ fontSize: '13px', fontWeight: 600 }}>{asset.code || asset.assetTag}</span>
+          <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: 'var(--spacing-md)' }}>S/N: {asset.serialNumber || '—'}</span>
           <Button variant="outline" size="sm" onClick={() => window.print()} style={{ width: '100%' }}>Print Label</Button>
         </div>
       </div>

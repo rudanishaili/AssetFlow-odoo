@@ -22,3 +22,5 @@ process.on('uncaughtException', (err) => {
   logger.error(err.stack || 'No stack trace available');
   process.exit(1);
 });
+
+// Restart trigger comment to reload nodemon following port release.

@@ -5,6 +5,7 @@ import Button from '../../../common/ui/Button.jsx';
 import Input from '../../../common/ui/Input.jsx';
 import Select from '../../../common/ui/Select.jsx';
 import useMockDataStore from '../../../store/mockDataStore.js';
+import { generateQRCodeUrl } from '../../../utils/generateQR.js';
 
 export const AssetListPage = () => {
   const navigate = useNavigate();
@@ -215,9 +216,13 @@ export const AssetListPage = () => {
             </p>
 
             <div style={{ padding: 'var(--spacing-md)', border: '1px solid var(--sage-light)', borderRadius: 'var(--radius-md)', background: 'var(--linen)', marginBottom: 'var(--spacing-lg)' }}>
-              <div style={{ width: '120px', height: '120px', background: '#000', margin: '0 auto var(--spacing-sm) auto' }} />
+              <img 
+                src={generateQRCodeUrl(selectedAsset?.code || selectedAsset?.assetTag)} 
+                alt="QR Code" 
+                style={{ width: '130px', height: '130px', display: 'block', margin: '0 auto var(--spacing-sm) auto' }} 
+              />
               <h4 style={{ fontSize: '16px', fontWeight: 600 }}>{selectedAsset?.name}</h4>
-              <span className="eyebrow" style={{ fontSize: '10px' }}>Ref Code: {selectedAsset?.code}</span>
+              <span className="eyebrow" style={{ fontSize: '10px' }}>Ref Code: {selectedAsset?.code || selectedAsset?.assetTag}</span>
             </div>
 
             <div className="flex gap-sm">
