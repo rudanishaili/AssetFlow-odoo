@@ -1,0 +1,269 @@
+/* Modern CSS Reset & Baseline */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--linen);
+  color: var(--ink);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  color: var(--moss);
+}
+
+h1 em, h2 em, h3 em {
+  font-style: italic;
+  color: var(--sage);
+}
+
+a {
+  color: var(--ink);
+  text-decoration: none;
+  transition: var(--transition-all);
+  font-family: var(--font-body);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Liora Motion Classes */
+.reveal-image {
+  filter: saturate(0.4) blur(6px);
+  transform: scale(1.04);
+  transition: filter 1.1s var(--ease-soft), transform 1.1s var(--ease-soft);
+}
+
+.reveal-image.in-view {
+  filter: saturate(1) blur(0);
+  transform: scale(1);
+}
+
+.fade-up {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s var(--ease-soft), transform 0.7s var(--ease-soft);
+}
+
+.fade-up.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-image, .fade-up, .btn-primary, .btn-secondary {
+    transition: none !important;
+    filter: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* Typography Utilities */
+.text-h1 {
+  font-size: clamp(40px, 5vw, 72px);
+  line-height: 1.05;
+}
+
+.text-h2 {
+  font-size: clamp(30px, 4vw, 44px);
+  line-height: 1.1;
+}
+
+.text-h3 {
+  font-size: clamp(20px, 2vw, 24px);
+  line-height: 1.2;
+  font-weight: 500;
+}
+
+.text-body-large {
+  font-size: clamp(17px, 1.5vw, 19px);
+  line-height: 1.6;
+}
+
+.text-body {
+  font-size: clamp(15px, 1vw, 16px);
+  line-height: 1.6;
+}
+
+.text-eyebrow {
+  font-size: clamp(11px, 0.8vw, 12px);
+  line-height: 1.4;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--sage);
+  font-weight: 500;
+}
+
+/* Button Utilities */
+.btn-primary {
+  background: var(--sage);
+  color: var(--cloud);
+  padding: 16px 32px;
+  border-radius: var(--radius-full);
+  font-weight: 500;
+  font-size: 15px;
+  transition: transform 0.35s var(--ease-soft), background 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-primary:hover {
+  background: var(--moss);
+  transform: translateY(-2px);
+}
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--moss);
+  border: 1px solid var(--moss);
+  padding: 15px 31px;
+  border-radius: var(--radius-full);
+  font-weight: 500;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-secondary:hover {
+  background: var(--moss);
+  color: var(--cloud);
+}
+.btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--sage);
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-ghost:hover {
+  background: var(--stone);
+  color: var(--moss);
+}
+
+.w-full {
+  width: 100%;
+}
+
+/* Card Utilities */
+.card {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 40px;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+.bg-cloud {
+  background-color: var(--cloud);
+}
+.bg-stone {
+  background-color: var(--stone);
+}
+.card.hover-lift:hover {
+  box-shadow: 0 12px 24px -8px rgba(63, 74, 60, 0.2);
+  transform: translateY(-4px);
+}
+
+/* Input Utilities */
+.input-wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+.input-field {
+  background-color: var(--cloud);
+  border: 1px solid var(--sage-light);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  color: var(--ink);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  outline: none;
+}
+.input-field:focus {
+  border-color: var(--sage);
+  box-shadow: 0 0 0 3px rgba(143, 160, 132, 0.2);
+}
+.input-error {
+  border-color: #D9534F; /* Soft red for errors */
+}
+.input-error-msg {
+  color: #D9534F;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+/* Icon Utilities */
+.icon-base {
+  transition: transform 0.3s var(--ease-spring);
+}
+button:hover .icon-base, a:hover .icon-base {
+  transform: rotate(4deg) scale(1.08);
+}
+
+/* Nav Link Hover Animation */
+.nav-link {
+  position: relative;
+  font-weight: 500;
+  padding: 4px 0;
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background-color: var(--sage);
+  transition: width 0.3s var(--ease-soft);
+}
+.nav-link:hover::after, .nav-link.active::after {
+  width: 100%;
+}
+/* For the auth layout flex trick on desktop */
+@media (min-width: 768px) {
+  .auth-right-panel {
+    display: block !important;
+  }
+}

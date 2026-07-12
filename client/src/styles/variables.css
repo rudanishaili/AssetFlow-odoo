@@ -1,0 +1,35 @@
+/* Liora Design System - Variables */
+:root {
+  /* Color Palette */
+  --linen: #F8F5EF;
+  --stone: #EFE8D9;
+  --ink: #2B2A25;
+  --moss: #3F4A3C;
+  --sage: #8FA084;
+  --sage-light: #C7D2BC;
+  --honey: #C9A667;
+  --cloud: #FFFFFF;
+
+  /* Typography */
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Inter", system-ui, -apple-system, sans-serif;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;     /* Inputs */
+  --radius-lg: 24px;     /* Cards */
+  --radius-full: 999px;  /* Buttons */
+
+  /* Shadows */
+  --shadow-soft: 0 8px 30px -12px rgba(43, 42, 37, 0.12);
+  --shadow-card: 0 4px 16px -8px rgba(63, 74, 60, 0.15);
+
+  /* Motion */
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-all: all 0.25s var(--ease-soft);
+
+  /* Spacing */
+  --space-section: 140px;
+  --space-section-mobile: 64px;
+}
